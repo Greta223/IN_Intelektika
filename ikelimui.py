@@ -1,10 +1,8 @@
-import itertools
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
 
 
 def calculate_silhouette_coefficient(data, labels):
@@ -51,26 +49,26 @@ def calculate_inertia(X, centroids, labels):
 
 
 def kmeans(X, k, max_iter=100):
-    #apsibreziame n ir d, n=eiluciu kiekis, d=stulpeliu kiekis
+    #Apsibreziame n ir d, n=eiluciu kiekis, d=stulpeliu kiekis
     n, d = X.shape
-    #atsitiktiniu budu parenkamas k kiekis centroidu
+    #Atsitiktiniu budu parenkamas k kiekis centroidu
     centroids = X[np.random.choice(n, k, replace=False), :]
-    #masyvas tasku klasteriams saugoti (koks taskas priklauso kokiam klasteriui)
+    #Masyvas tasku klasteriams saugoti (koks taskas priklauso kokiam klasteriui)
     labels = np.zeros(n)
 
-    #apsauga nuo nesibaigiancio ciklo
+    #Apsauga nuo nesibaigiancio ciklo
     for _ in range(max_iter):
-        #masyvas saugantis atstumus nuo kiekvieno tasko iki kiekvieno centroido
+        #Masyvas saugantis atstumus nuo kiekvieno tasko iki kiekvieno centroido
         distances = np.zeros((n, k))
 
         # Calculate distances between each sample and centroids
-        #einame per visus taskus
+        #Einame per visus taskus
         for i in range(n):
             for j in range(k):
-                #pasiskaicuoja atstumus nuo kiekvieno centroido
+                #Pasiskaicuoja atstumus nuo kiekvieno centroido
                 distances[i, j] = calculate_distance(X[i], centroids[j])
 
-        #taskams priskiriamu klasteriu masyvas
+        #Taskams priskiriamu klasteriu masyvas
         new_labels = np.zeros(n)
 
         # Assign labels based on minimum distance
@@ -85,10 +83,10 @@ def kmeans(X, k, max_iter=100):
         if np.array_equal(labels, new_labels):
             break
 
-        #atnaujiname priskyrima klasteriui
+        #Atnaujiname priskyrima klasteriui
         labels = new_labels
 
-        #einame per centroidus ir atnaujiname visus centroidu pozicijas
+        #Einame per centroidus ir atnaujiname visus centroidu pozicijas
         for j in range(k):
             centroids[j] = np.mean(X[labels == j], axis=0)
 
@@ -97,13 +95,13 @@ def kmeans(X, k, max_iter=100):
 
 def som(X, som_shape, sigma=1.0, learning_rate=0.5, max_iter=100):
     n, d = X.shape
-    #klasteriu kiekis
+    #Klasteriu kiekis
     som_size = som_shape[0] * som_shape[1]
-    #padaromas SOM grid
+    #Padaromas SOM grid
     som = np.random.randn(som_size, d)
 
     for _ in range(max_iter):
-        #ivesties vektorius
+        #Ivesties vektorius
         x = X[np.random.randint(n)]
         distances = np.zeros(som_size)
 
@@ -138,7 +136,7 @@ def som(X, som_shape, sigma=1.0, learning_rate=0.5, max_iter=100):
 
     som_labels = np.zeros(n)
 
-    #kai suformuoti klasteriai, taskai priskiriami jiems
+    # Kai suformuoti klasteriai, taskai priskiriami jiems
     # Assign labels based on minimum distance to SOM nodes
     for i in range(n):
         distances = np.zeros(som_size)
@@ -164,82 +162,9 @@ data0 = pd.read_csv('MAISTO_DUOMENYS.csv', sep=';')
 data = data0.fillna(0)
 
 # Extract the features from the dataset
-#feature_columns = ['Water_(g)', 'Energ_Kcal', 'Protein_(g)' ,'Lipid_Tot_(g)', 'Carbohydrt_(g)',
-#                    'Fiber_TD_(g)', 'Sugar_Tot_(g)', 'Iron_(mg)', 'Cholestrl_(mg)']
-# feature_columns = ['Water_(g)', 'Protein_(g)' , 'Cholestrl_(mg)'] #  0.55 su 5 K, 0.6 su K=3
-#feature_columns = [ 'Protein_(g)' , 'Energ_Kcal', 'Iron_(mg)']
-# feature_columns = ['Carbohydrt_(g)', 'Sugar_Tot_(g)']
-# feature_columns = ['Protein_(g)', 'Fiber_TD_(g)', 'Cholestrl_(mg)']
-# feature_columns = ['Carbohydrt_(g)', 'Fiber_TD_(g)']
-feature_columns = ['Fiber_TD_(g)', 'Sugar_Tot_(g)']
-# Generate all combinations
-# max_k = -10
-# max_s = -10
-# max_k_id = []
-# max_s_id = []
-# max_sum = -10
-# max_sum_id = []
-# min_k_inertia = 99999999999999
-# min_k_inertia_id = []
-# for r in range(2, len(feature_columns) + 1):
-#     combinations = list(itertools.combinations(feature_columns, r))
-#     print(f"Combinations of size {r}:")
-#     for combination in combinations:
-#         print(combination)
-#         X = data[list(combination)].values
-#
-#         # Normalize the data
-#         scaler = StandardScaler()
-#         X = scaler.fit_transform(X)
-#
-#         # K-means clustering
-#         k = 5
-#         kmeans_labels, kmeans_centroids = kmeans(X, k)
-#         inertia = calculate_inertia(X, kmeans_centroids, kmeans_labels)
-#         if len(np.unique(kmeans_labels)) < 2:
-#             print("Skipping - Only 1 cluster found.")
-#             continue
-#         kmeans_silhouette = silhouette_score(X, kmeans_labels)
-#         print("K-Means: ", kmeans_silhouette)
-#         # if kmeans_silhouette > max_k:
-#         #     max_k = kmeans_silhouette
-#         #     max_k_id = combination
-#         #     max_k_inertia = inertia
-#         if inertia < min_k_inertia:
-#              min_k_inertia = inertia
-#              min_k_inertia_id = combination
-#
-#         # # SOM clustering
-#         # som_shape = (5, 1)
-#         # sigma = 1.0
-#         # learning_rate = 0.5
-#         # som_labels, som1 = som(X, som_shape, sigma, learning_rate)
-#         # if len(np.unique(som_labels)) < 2:
-#         #     print("Skipping - Only 1 cluster found.")
-#         #     continue
-#         # # som_silhouette = np.mean(calculate_silhouette_coefficient(X, som_labels))
-#         # som_silhouette = silhouette_score(X, som_labels)
-#         # print("SOM: ", som_silhouette)
-#         # if som_silhouette > max_s:
-#         #     max_s = som_silhouette
-#         #     max_s_id = combination
-#         # if som_silhouette + kmeans_silhouette > max_sum and abs(som_silhouette-kmeans_silhouette) < 0.3:
-#         #     max_sum = som_silhouette + kmeans_silhouette
-#         #     max_sum_id = combination
-#     print()
-# # print(max_k)
-# # print(max_k_id)
-# # print(max_k_inertia)
-# # print()
-# print(min_k_inertia)
-# print(min_k_inertia_id)
-# print()
-# # print(max_s)
-# # print(max_s_id)
-# # print()
-# # print(max_sum)
-# # print(max_sum_id)
-# # print()
+feature_columns = ['Water_(g)', 'Energ_Kcal', 'Protein_(g)' ,'Lipid_Tot_(g)', 'Carbohydrt_(g)',
+                    'Fiber_TD_(g)', 'Sugar_Tot_(g)', 'Iron_(mg)', 'Cholestrl_(mg)']
+
 
 X = data[feature_columns].values
 
@@ -251,26 +176,24 @@ X = scaler.fit_transform(X)
 k = 5
 kmeans_labels, kmeans_centroids = kmeans(X, k)
 # Calculate inertia
-# inertia = calculate_inertia(X, kmeans_centroids, kmeans_labels)
-# print("Inertia:", inertia)
-#kmeans_silhouette = silhouette_score(X, kmeans_labels)
+inertia = calculate_inertia(X, kmeans_centroids, kmeans_labels)
+print("Inertia:", inertia)
 kmeans_silhouette = np.mean(calculate_silhouette_coefficient(X, kmeans_labels))
-# # # SOM clustering
-# # som_shape = (5, 1)
-# # sigma = 1.0
-# # learning_rate = 0.5
-# # som_labels, som = som(X, som_shape, sigma, learning_rate)
-# # som_silhouette = 0.0
-# # if len(np.unique(som_labels)) > 2:
-# #     print("Skipping - Only 1 cluster found.")
-# #     som_silhouette = np.mean(calculate_silhouette_coefficient(X, kmeans_labels))
-# # # Plot results
+# SOM clustering
+som_shape = (5, 1)
+sigma = 1.0
+learning_rate = 0.5
+som_labels, som = som(X, som_shape, sigma, learning_rate)
+som_silhouette = 0.0
+if len(np.unique(som_labels)) > 2:
+    print("Skipping - Only 1 cluster found.")
+    som_silhouette = np.mean(calculate_silhouette_coefficient(X, kmeans_labels))
 # Calculate inertia
-# inertias = []
-# for k_val in range(1, 10):
-#     kmeans_labels, kmeans_centroids = kmeans(X, k_val)
-#     inertia = calculate_inertia(X, kmeans_centroids, kmeans_labels)
-#     inertias.append(inertia)
+inertias = []
+for k_val in range(1, 10):
+    kmeans_labels, kmeans_centroids = kmeans(X, k_val)
+    inertia = calculate_inertia(X, kmeans_centroids, kmeans_labels)
+    inertias.append(inertia)
 
 # Calculate silhouette coefficients for different values of k
 silhouette_scores = []
@@ -283,22 +206,22 @@ fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 axes[0].scatter(X[:, 0], X[:, 1], c=kmeans_labels)
 axes[0].scatter(kmeans_centroids[:, 0], kmeans_centroids[:, 1], s=100, marker='x', c='black')
 axes[0].set_title(f"K-means clustering (Silhouette score: {kmeans_silhouette:.2f})")
-# #som_silhouette = np.mean(calculate_silhouette_coefficient(X, kmeans_labels))
-# # axes[1].scatter(X[:, 0], X[:, 1], c=som_labels)
-# # axes[1].scatter(som[:, 0], som[:, 1], s=100, marker='x', c='black')
-# # axes[1].set_title(f"SOM klasteriai : {som_silhouette:.2f})")
+som_silhouette = np.mean(calculate_silhouette_coefficient(X, kmeans_labels))
+axes[1].scatter(X[:, 0], X[:, 1], c=som_labels)
+axes[1].scatter(som[:, 0], som[:, 1], s=100, marker='x', c='black')
+axes[1].set_title(f"SOM klasteriai : {som_silhouette:.2f})")
 # Plot inertia values
-# k_values = range(1, 10)
-# axes[1].plot(k_values, inertias, marker='o')
-# axes[1].set_xlabel('Number of Clusters (k)')
-# axes[1].set_ylabel('Inertia')
-# axes[1].set_title('Inertia vs. Number of Clusters')
+k_values = range(1, 10)
+axes[2].plot(k_values, inertias, marker='o')
+axes[2].set_xlabel('Number of Clusters (k)')
+axes[2].set_ylabel('Inertia')
+axes[2].set_title('Inertia vs. Number of Clusters')
 # Plot silhouette coefficients
 k_values = range(2, 10)
-axes[1].plot(k_values, silhouette_scores, marker='o')
-axes[1].set_xlabel('Number of Clusters (k)')
-axes[1].set_ylabel('Silhouette Coefficient')
-axes[1].set_title('Silhouette Coefficient vs. Number of Clusters')
+axes[3].plot(k_values, silhouette_scores, marker='o')
+axes[3].set_xlabel('Number of Clusters (k)')
+axes[3].set_ylabel('Silhouette Coefficient')
+axes[3].set_title('Silhouette Coefficient vs. Number of Clusters')
 
 plt.tight_layout()
 plt.show()
